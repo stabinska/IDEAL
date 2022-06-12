@@ -32,4 +32,5 @@ Download the latest version from this [GitHub repository](https://github.com/sta
 - [Helge Jörn Zöllner](mailto:hzoelln2@jhmi.edu)
 - [Thomas Thiel](mailto:thomas.thiel@hhu.de)
 
-Should you publish material that made use of this source code, please cite the following publication.
+Should you publish material that made use of this source code, please cite the following publication:
+[Image Downsampling Expedited Adaptive Least-squares (IDEAL) fitting improves intravoxel incoherent motion (IVIM) analysis in the human kidney](https://biorxiv.org/cgi/content/short/2022.06.09.495469v1).
