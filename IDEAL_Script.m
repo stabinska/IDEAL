@@ -36,16 +36,15 @@
     P.b_values = [0,10,20,30,50,70,100,150,200,250,300,350,450,550,650,750];
     P.slice = 1;
 %   Output folder for the plots (will be created automatically)
-    P.outputFolder = '/Users/helge/Documents/MATLAB/IDEAL/output';
+    P.outputFolder = 'E:\Sciebo\Projekte\Kidney_IDEAL\test_data\output';
     P.plot = 1; %Plot flag
 
 %% Call IDEAL fit
 % Include path to 3D DWI nifti file, parameter struct, nifit mask, and a
 % cell array of nifit ROIs for the statistics (optional)
 
-Data = '/Users/helge/Documents/MATLAB/IDEALfitting 2/Delta_niere/Delta_niere06/NIFTI/20200804_164104DTIPGSETE71Delta20delta62s006a1001.nii'; %Path to data
-MaskNii = '/Users/helge/Documents/MATLAB/IDEALfitting 2/Delta_niere/Delta_niere06/NIFTI/20200804_164104DTIPGSETE71Delta20delta62s006a1001_mask.nii'; %Path to mask
-ROIsNiiCell = {'/Users/helge/Documents/MATLAB/IDEALfitting 2/ROIs Julia/Delta_Niere06_sl1_cortexrechts.nii.gz',...
-    '/Users/helge/Documents/MATLAB/IDEALfitting 2/ROIs Julia/Delta_Niere06_sl1_markrechts.nii.gz'}; %Cell with paths to ROIs
+Data = 'E:\Sciebo\Projekte\Kidney_IDEAL\test_data\delta_00_026_s2_mc.nii'; %Path to data
+MaskNii = 'E:\Sciebo\Projekte\Kidney_IDEAL\test_data\delta_00_026_s2_mc.nii'; %Path to mask
+ROIsNiiCell = {'E:\Sciebo\Projekte\Kidney_IDEAL\test_data\delta_00_026_s2_mc.nii'}; %Cell with paths to ROIs
 
 [FitResults,FitQuality,P,ROIstat] = IDEALfitIVIM(Data,P,MaskNii,ROIsNiiCell);
