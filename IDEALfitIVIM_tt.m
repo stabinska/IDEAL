@@ -26,38 +26,25 @@ if nargin < 3
     error('You need to supply at least a 3D-DWI data matrix as *.nii.gz, a struct with settings (see IDEAL script), and a mask volume of the volume of interest as *.nii.gz');
 end
 
-%% Load data, mask ,and ROIs
-data_nifti = double(rot90(niftiread(DataNii)));
-Data = squeeze(data_nifti(:,:,P.slice,:));
-
-Mask_nifti = double(rot90(niftiread(MaskNii)));
-Mask = Mask_nifti(:,:,P.slice); 
-Mask_nan = Mask;
-Mask_nan(Mask == 0) = NaN;
-
-if nargin > 3
-    ROIs{1} = double(rot90(niftiread(MaskNii)));
-    ROIs{1} = ROIs{1}(:,:,P.slice); 
-    ROIs{1}(ROIs{1}==0) =NaN; 
-    for rois = 2 : length(ROINii)+1
-        ROIs{rois} = double(rot90(niftiread(ROINii{rois-1})));
-        ROIs{rois}(ROIs{rois}==0) =NaN;
-    end
+% check if ROIs were supplied
+if nargin > 3 
+    load_rois = true;
 else
-   ROIs{1} = double(rot90(niftiread(MaskNii)));
-   ROIs{1} = ROIs{1}(:,:,P.slice); 
-   ROIs{1}(ROIs{1}==0) =NaN; 
-   sprintf('No ROI supplied. We will do statistics on the VOI mask.')
+    load_rois = false;
 end
+
+% Load Data
+[Data, Mask, Data_masked] = load_files(DataNii,MaskNii,P.slice);
+ROIs = load_ROIS(MaskNii,ROINii,P.slice,load_rois); % maybe move down to eval section
+
 
 %% Perform IDEAL fitting
 
-clearvars a b c d e f fitresults gof output
-Data_masked = Data.*Mask_nan;
+% clearvars a b c d e f fitresults gof output
 
 tStart = tic;
 for res = 1 : size(P.Dims_steps, 1)
-    % res : current downsampling step    
+    % res : current resampling step    
     fprintf('Downsampling step no: %s\n', num2str(res));
     
     % Basic ADC Parameters
@@ -99,12 +86,14 @@ for res = 1 : size(P.Dims_steps, 1)
     FitResults = cell(size(Mask_res, 1), size(Mask_res, 2));
     gof = FitResults;
     output = FitResults;    
+     
     
     % Load starting values
     if res == 1
-        op.Lower =      P.op.Lower;
-        op.StartPoint = P.op.StartPoint;
-        op.Upper =      P.op.Upper;
+        op = P.op;
+%         op.Lower =      P.op.Lower;
+%         op.StartPoint = P.op.StartPoint;
+%         op.Upper =      P.op.Upper;
     end 
     
     % Voxelvise fitting iterators
@@ -112,21 +101,21 @@ for res = 1 : size(P.Dims_steps, 1)
         for y = 1: size(Mask_res, 2)           
               
             if res > 1
-                % Setup Parameter for corresponding res
+                % Updating Start Values and Boundries for next run
                 switch P.op.Model 
                     case 'ADC'
                        [op.Lower,op.StartPoint,op.Upper] = ...
-                            set_fitting_boundries(P.Tol,P.op.Model,S_0_res,...
-                            D_slow_res); 
+                            set_fitting_boundries(P.Tol,P.op.Model,S_0_res(x,y),...
+                            D_slow_res(x,y)); 
                     case 'Biexp'
                         [op.Lower,op.StartPoint,op.Upper] = ...
-                            set_fitting_boundries(P.Tol,P.op.Model,S_0_res,...
-                            D_slow_res,f_fast_res,D_fast_res);
+                            set_fitting_boundries(P.Tol,P.op.Model,S_0_res(x,y),...
+                            D_slow_res(x,y),f_fast_res(x,y),D_fast_res(x,y));
                     case 'Triexp'
                         [op.Lower,op.StartPoint,op.Upper] = ...
-                            set_fitting_boundries(P.Tol,P.op.Model,S_0_res,...
-                            D_slow_res,f_fast_res,D_fast_res,...
-                            f_inter_res,D_inter_res);
+                            set_fitting_boundries(P.Tol,P.op.Model,S_0_res(x,y),...
+                            D_slow_res(x,y),f_fast_res(x,y),D_fast_res(x,y),...
+                            f_inter_res(x,y),D_inter_res(x,y));
                 end
             end
             if Mask_res(x,y)
@@ -183,6 +172,7 @@ for res = 1 : size(P.Dims_steps, 1)
 end
 P.time = toc(tStart);
 
+IDEALevalTri(Mask,FitResults,gof,output,DataNii,P,ROIs,ROINii,Data,MaskNii);
 
 end
 
@@ -194,6 +184,7 @@ function [Lower,Upper,StartPoint] = set_fitting_boundries(Tol,Model,S_0,D1,varar
 %
 %
 % varargin : {f_slow, D_slow, f_inter, D_inter}
+%            {f_2,    D_2,    f3,      D3)
 
     switch Model 
         case 'ADC'
@@ -205,7 +196,7 @@ function [Lower,Upper,StartPoint] = set_fitting_boundries(Tol,Model,S_0,D1,varar
             Lower(1) = D1*(1-Tol(2));
             StartPoint(1) = D1;
             Upper(1) = D1*(1+Tol(2));
-        case 'Bi'
+        case 'Biexp'
             if nargin < 2
                 error('Missing f_slow and/or D_slow'); end
             Lower = zeros(1,4);
@@ -231,7 +222,7 @@ function [Lower,Upper,StartPoint] = set_fitting_boundries(Tol,Model,S_0,D1,varar
             StartPoint(3) = D2;
             Upper(3) = D2*(1+Tol(2));
             
-        case 'Tri'                        
+        case 'Triexp'                        
             Lower = zeros(1,6);
             StartPoint = zeros(1,6);
             Upper = zeros(1,6);
@@ -266,158 +257,17 @@ function [Lower,Upper,StartPoint] = set_fitting_boundries(Tol,Model,S_0,D1,varar
             % D_inter
             Lower(4) = D3*(1-Tol(2));
             StartPoint(4) = D3;
-            Upper(4) = D3_res*(1+Tol(2));
+            Upper(4) = D3*(1+Tol(2));
             
             % D_fast
-            Lower(5) = D2*(1-Tol(21));
+            Lower(5) = D2*(1-Tol(2));
             StartPoint(5) = D2;
             Upper(5) = D2*(1+Tol(2));
     end
     
     % add S_0
     Lower(end)     = S_0*(1-Tol(3));
-    StartPoint(end)= f_res;
+    StartPoint(end)= S_0;
     Upper(end)     = S_0*(1+Tol(3));
     
-end
-function IDEALevalTri(Mask,FitResults,gof,output,DataNii,P,ROIs,ROInii)
-
-%% Extract the parameters maps
-
-f_slow = nan(size(Mask));
-f_interm = nan(size(Mask));
-f_fast = nan(size(Mask));
-D_slow = nan(size(Mask));
-D_interm = nan(size(Mask));
-D_fast = nan(size(Mask));
-S_0 = nan(size(Mask));
-
-SSE = nan(size(Mask));
-Rsq = nan(size(Mask));
-Dfe = nan(size(Mask));
-AdjRsq = nan(size(Mask));
-RMSE = nan(size(Mask));
-Residuals = nan(size(Mask, 1), size(Mask, 2), 16);
-
-
-for kx = 1:size(Mask, 1)
-    for ky = 1:size(Mask, 2)
-        if ~isempty(FitResults{kx,ky})
-            f_slow(kx, ky) = 1 - FitResults{kx,ky}.a - FitResults{kx,ky}.b;
-            f_interm(kx, ky) = FitResults{kx,ky}.a;
-            f_fast(kx, ky) = FitResults{kx,ky}.b;
-            
-            D_slow(kx, ky) = FitResults{kx,ky}.c;
-            D_interm(kx, ky) = FitResults{kx,ky}.d;
-            D_fast(kx, ky) = FitResults{kx,ky}.e;
-            S_0(kx, ky) = FitResults{kx,ky}.f;
-            
-            FitQuality.SSE(kx, ky) = gof{kx,ky}.sse;
-            FitQuality.Rsq(kx, ky) = gof{kx,ky}.rsquare;
-            FitQuality.Dfe(kx, ky) = gof{kx,ky}.dfe;
-            FitQuality.AdjRsq(kx, ky) = gof{kx,ky}.adjrsquare;
-            FitQuality.RMSE(kx, ky) = gof{kx,ky}.rmse;
-            FitQuality.Residuals(kx, ky, :) = output{kx,ky}.residuals;
-        end
-    end
-end
-
-%% Plot the parameter maps
-[~,file_name,~] = fileparts(DataNii);
-if P.plot
-    figure('Visible','on')
-    
-    subplot(3,3,1)
-    imagesc(f_slow);
-    caxis(gca,[0 1])
-    title('f_{slow}')
-    colormap gray;
-    axis off;
-    
-    subplot(3,3,2)
-    imagesc(f_interm);
-    caxis(gca,[0 1])
-    title('f_{interm}')
-    colormap gray;
-    axis off;
-    
-    subplot(3,3,3)
-    imagesc(f_fast);
-    caxis(gca,[0 1])
-    title('f_{fast}')
-    colormap gray;
-    axis off;
-    
-    subplot(3,3,4)
-    imagesc(D_slow);
-    title('D_{slow}')
-    colormap gray;
-    axis off;
-    
-    subplot(3,3,5)
-    imagesc(D_interm);
-    title('D_{interm}')
-    colormap gray;
-    axis off;
-    
-    subplot(3,3,6)
-    imagesc(D_fast);
-    title('D_{fast}')
-    colormap gray;
-    axis off;
-    
-    subplot(3,3,7)
-    imagesc(S_0);
-    title('S_{0,fit}');
-    colormap gray;
-    axis off;
-    
-    subplot(3,3,8)
-    imagesc(squeeze(Data(:, :, 1)));
-    title('S_{0}');
-    colormap gray;
-    axis off;
-    
-    if ~exist(P.outputFolder)
-        mkdir(P.outputFolder);
-    end
-    fignm_param = sprintf([P.outputFolder,'/IDEALfit_%s_steps_%s_param.fig'], file_name, num2str(size(P.Dims_steps, 1)));
-    savefig(gcf, fignm_param);
-    close(gcf);
-end
-
-%% Perform ROI-based analysis
-ROIstat.ROIname = cell(1,length(ROIs));
-IVIMPars = {'f_slow','f_interm','f_fast','D_slow','D_interm','D_fast','S_0'};
-for par = 1 : length(IVIMPars)
-    ROIstat.(IVIMPars{par}).mean = zeros(1,length(ROIs));
-    ROIstat.(IVIMPars{par}).median = zeros(1,length(ROIs));
-    ROIstat.(IVIMPars{par}).std = zeros(1,length(ROIs));
-    ROIstat.(IVIMPars{par}).CV = zeros(1,length(ROIs));
-    ROIstat.(IVIMPars{par}).iqr = zeros(1,length(ROIs));
-    ROIstat.(IVIMPars{par}).q1 = zeros(1,length(ROIs));
-    ROIstat.(IVIMPars{par}).q3 = zeros(1,length(ROIs));
-end
-
-for rois = 1 : length(ROIs)
-    if rois == 1
-        [~,name,~] = fileparts(MaskNii);
-    else
-        [~,name,~] = fileparts(ROINii{rois-1});
-    end
-    ROIstat.ROIname{rois} = name;
-    for par = 1 : length(IVIMPars)
-        eval(['ROIstat.' IVIMPars{par} '.mean(rois) = nanmean(' IVIMPars{par} '(ROIs{rois}==1),''all'');']);
-        eval(['ROIstat.' IVIMPars{par} '.median(rois) = nanmedian(' IVIMPars{par} '(ROIs{rois}==1),''all'');']);
-        eval(['ROIstat.' IVIMPars{par} '.std(rois) = nanstd(' IVIMPars{par} '(ROIs{rois}==1),0,''all'');']);
-        eval(['ROIstat.' IVIMPars{par} '.CV(rois) = ROIstat.' IVIMPars{par} '.std(rois) /ROIstat.' IVIMPars{par} '.mean(rois);']);
-        eval(['ROIstat.' IVIMPars{par} '.iqr(rois) = iqr(reshape(' IVIMPars{par} '(ROIs{rois}==1),[],1));']);
-        eval(['ROIstat.' IVIMPars{par} '.q1(rois) = prctile(reshape(' IVIMPars{par} '(ROIs{rois}==1),[],1),25);']);
-        eval(['ROIstat.' IVIMPars{par} '.q3(rois) = prctile(reshape(' IVIMPars{par} '(ROIs{rois}==1),[],1),1);']);
-    end
-end
-
-
-filenm = sprintf([P.outputFolder '/IDEALfit%s_steps_%s.mat'], file_name, num2str(size(P.Dims_steps, 1)));
-save(filenm);
 end

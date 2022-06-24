@@ -232,7 +232,7 @@ if P.plot
     if ~exist(P.outputFolder)
         mkdir(P.outputFolder);
     end
-    fignm_param = sprintf([P.outputFolder,'/IDEALfit_%s_steps_%s_param.fig'], file_name, num2str(size(P.Dims_steps, 1)));
+    fignm_param = sprintf([P.outputFolder,'%sIDEALfit_%s_steps_%s_param.fig'], filesep, file_name, num2str(size(P.Dims_steps, 1)));
     savefig(gcf, fignm_param);
     close(gcf);
 end
@@ -269,7 +269,7 @@ for rois = 1 : length(ROIs)
 end
 
 
-filenm = sprintf([P.outputFolder '/IDEALfit%s_steps_%s.mat'], file_name, num2str(size(P.Dims_steps, 1)));
+filenm = sprintf([P.outputFolder '%sIDEALfit%s_steps_%s.mat'],filesep, file_name, num2str(size(P.Dims_steps, 1)));
 save(filenm);
 
 end
