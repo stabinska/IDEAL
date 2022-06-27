@@ -8,7 +8,7 @@
     P.op.Display = 'Off';
     P.op.Algorithm = 'Trust-Region';
     P.op.MaxIter = 600;
-    P.op.Model = 'Triexp';
+    P.Model = 'Triexp';
 
 %   Start parameter, upper and lower points, and tolerance level during the
 %   IDEAL resampling. The tolerance level for step n + 1 is given in percent of the

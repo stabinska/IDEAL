@@ -104,9 +104,8 @@ if P.plot
     savefig(gcf, fignm_param);
     close(gcf);
 end
-
-ROIstat = eval_rois(ROIs,ROINii,MaskNii,f_slow,f_interm,f_fast,D_slow,D_interm,D_fast,S_0)
-
+   
+ROIstat = eval_rois(ROIs,ROINii,MaskNii,f_slow,f_interm,f_fast,D_slow,D_interm,D_fast,S_0);
 
 filenm = sprintf('%s%sIDEALfit%s_steps_%s.mat',...
     P.outputFolder, filesep, file_name, num2str(size(P.Dims_steps, 1)));

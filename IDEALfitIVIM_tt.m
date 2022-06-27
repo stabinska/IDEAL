@@ -36,32 +36,37 @@ end
 % loop over selceted slices
 
 % Load Data
-    slice = P.slice;
-    [Data, Mask, Data_masked] = load_files(DataNii,MaskNii,slice);
-    ROIs = load_ROIS(MaskNii,ROINii,slice,load_rois); % maybe move down to eval section
+[Data_raw, Mask_raw, Data_raw_masked] = load_files(DataNii,MaskNii);
+ROIs = load_ROIS(MaskNii,ROINii,load_rois); % maybe move down to eval section
 
 
 %% Perform IDEAL fitting
 
 % clearvars a b c d e f fitresults gof output
-
+for slice = 1:(size(Data_raw,3))
+    
+    % Select single slice for image resizing
+    Data = squeeze(Data_raw(:,:,slice,:));
+    Data_masked = squeeze(Data_raw_masked(:,:,slice,:));
+    Mask = squeeze(Mask_raw(:,:,slice,:));
+    
     tStart = tic;
     for res = 1 : size(P.Dims_steps, 1)
         % res : current resampling step    
-        fprintf('Downsampling step no: %s\n', num2str(res));
+        fprintf('Downsampling step no: %s of slice %s\n', num2str(res), num2str(slice));
 
         % Basic ADC Parameters
         S_0 = zeros(P.Dims_steps(res,1), P.Dims_steps(res,2)); % S_0
         D_slow = zeros(P.Dims_steps(res,1), P.Dims_steps(res,2)); % D_slow
 
         % Parameters for Bi and Tri
-        if strcmp(P.op.Model,'Biexp') || strcmp(P.op.Model,'Triexp')          
+        if strcmp(P.Model,'Biexp') || strcmp(P.Model,'Triexp')          
             f_fast = zeros(P.Dims_steps(res,1), P.Dims_steps(res,2)); % f_fast
             D_fast = zeros(P.Dims_steps(res,1), P.Dims_steps(res,2)); % D_fast
         end
 
         % Parameters for Tri
-        if strcmp(P.op.Model,'Triexp')
+        if strcmp(P.Model,'Triexp')
             f_inter = zeros(P.Dims_steps(res,1), P.Dims_steps(res,2)); % f_inter
             D_inter = zeros(P.Dims_steps(res,1), P.Dims_steps(res,2)); % D_inter   
         end        
@@ -98,29 +103,30 @@ end
 
         % Voxelvise fitting iterators
         for x = 1 : size(Mask_res, 1)
-            for y = 1: size(Mask_res, 2)           
-
+            for y = 1: size(Mask_res, 2)
                 if res > 1
                     % Updating Start Values and Boundries for next run
-                    switch P.op.Model 
+                    switch P.Model 
                         case 'ADC'
                            [op.Lower,op.StartPoint,op.Upper] = ...
-                                set_fitting_boundries(P.Tol,P.op.Model,S_0_res(x,y),...
-                                D_slow_res(x,y)); 
+                                set_fitting_boundries(P.Tol,P.Model,...
+                                S_0_res(x,y),D_slow_res(x,y)); 
                         case 'Biexp'
                             [op.Lower,op.StartPoint,op.Upper] = ...
-                                set_fitting_boundries(P.Tol,P.op.Model,S_0_res(x,y),...
-                                D_slow_res(x,y),f_fast_res(x,y),D_fast_res(x,y));
+                                set_fitting_boundries(P.Tol,P.Model,...
+                                S_0_res(x,y),D_slow_res(x,y),...
+                                f_fast_res(x,y),D_fast_res(x,y));
                         case 'Triexp'
                             [op.Lower,op.StartPoint,op.Upper] = ...
-                                set_fitting_boundries(P.Tol,P.op.Model,S_0_res(x,y),...
-                                D_slow_res(x,y),f_fast_res(x,y),D_fast_res(x,y),...
+                                set_fitting_boundries(P.Tol,P.Model,...
+                                S_0_res(x,y),D_slow_res(x,y),...
+                                f_fast_res(x,y),D_fast_res(x,y),...
                                 f_inter_res(x,y),D_inter_res(x,y));
                     end
                 end
                 if Mask_res(x,y)
                     if ~isnan(Data_res(x,y,1))
-                        switch P.op.Model
+                        switch P.Model
                             case 'ADC'
                             case 'Biexp'
                                 [FitResults{x,y}, gof{x,y}, output{x,y}] = BiexpFit(...
@@ -141,7 +147,6 @@ end
                                 S_0(x,y)     = FitResults{x,y}.f; % S_0
                         end                   
                     end
-
                 end
             end
 
@@ -154,14 +159,14 @@ end
             D_slow_res = imresize(D_slow,...
                 [P.Dims_steps(res+1,2) P.Dims_steps(res+1,1)], 'bilinear');
 
-            if strcmp(P.op.Model,'Biexp') || strcmp(P.op.Model,'Triexp')  
+            if strcmp(P.Model,'Biexp') || strcmp(P.op.Model,'Triexp')  
                 f_fast_res = imresize(f_fast,...
                     [P.Dims_steps(res+1,2) P.Dims_steps(res+1,1)], 'bilinear');        
                 D_fast_res = imresize(D_fast,...
                     [P.Dims_steps(res+1,2) P.Dims_steps(res+1,1)], 'bilinear');
             end
 
-            if strcmp(P.op.Model,'Triexp')
+            if strcmp(P.Model,'Triexp')
                 f_inter_res = imresize(f_inter,...
                     [P.Dims_steps(res+1,2) P.Dims_steps(res+1,1)], 'bilinear');
                 D_inter_res = imresize(D_inter,...
@@ -171,17 +176,29 @@ end
 
     end
     P.time = toc(tStart);
-
-    [FitQuality,ROIstat] = IDEALevalTri(Mask,FitResults,gof,output,...
-                            DataNii,P,ROIs,ROINii,Data,MaskNii);
+    
+    % prepare struct
+    FitQuality = cell(size(Data_raw,3),1,1);
+    ROIstat = cell(size(Data_raw,3),1,1);
+    % prepare ROI
+    ROI{1} = squeeze(ROIs{1}(:,:,slice));
+    
+    if find(~cellfun(@isempty,FitResults))
+        FitQuality{slice} = {};
+        ROIstat{slice} = {};
+    else
+        [FitQuality{slice},ROIstat{slice}] = IDEALevalTri(Mask,FitResults,gof,output,...
+                            DataNii,P,ROI,ROINii,Data,MaskNii);
+    end
+end
 end
 
 
 %% NESTED FUNCTIONS
 
 function [Lower,Upper,StartPoint] = set_fitting_boundries(Tol,Model,S_0,D1,varargin)
-%%
-%
+%% [Lower,Upper,StartPoint] = set_fitting_boundries(Tol,Model,S_0,D1,varargin)
+% recalculate 
 %
 % varargin : {f_slow, D_slow, f_inter, D_inter}
 %            {f_2,    D_2,    f3,      D3)
