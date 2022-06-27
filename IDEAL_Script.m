@@ -37,7 +37,7 @@
     P.b_values = [0,10,20,30,50,70,100,150,200,250,300,350,450,550,650,750];
     P.slice = 1;
 %   Output folder for the plots (will be created automatically)
-    P.outputFolder = 'E:\home\Thomas\Sciebo\Projekte\Kidney_IDEAL\test_data_julia\output';
+    P.outputFolder = 'E:\home\Thomas\Sciebo\Projekte\Kidney_IDEAL\test_data_julia\output_tt';
     P.plot = 1; %Plot flag
 
 %% Call IDEAL fit
@@ -48,4 +48,4 @@ Data = 'E:\home\Thomas\Sciebo\Projekte\Kidney_IDEAL\test_data_julia\20200804_164
 MaskNii = 'E:\home\Thomas\Sciebo\Projekte\Kidney_IDEAL\test_data_julia\Delta_Niere06_sl1_niererechts.nii'; %Path to mask
 ROIsNiiCell = {'E:\home\Thomas\Sciebo\Projekte\Kidney_IDEAL\test_data_julia\Delta_Niere06_sl1_cortexrechts.nii'}; %Cell with paths to ROIs
 
-[FitResults,FitQuality,P,ROIstat] = IDEALfitIVIM(Data,P,MaskNii,ROIsNiiCell);
+[FitResults,FitQuality,P,ROIstat] = IDEALfitIVIM_tt(Data,P,MaskNii,ROIsNiiCell);

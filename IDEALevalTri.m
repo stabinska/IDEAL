@@ -1,4 +1,4 @@
-function IDEALevalTri(Mask,FitResults,gof,output,DataNii,P,ROIs,ROINii,Data,MaskNii)
+function [FitQuality,ROIstat] = IDEALevalTri(Mask,FitResults,gof,output,DataNii,P,ROIs,ROINii,Data,MaskNii)
 
 %% Extract the parameters maps
 
@@ -105,39 +105,68 @@ if P.plot
     close(gcf);
 end
 
-%% Perform ROI-based analysis
-ROIstat.ROIname = cell(1,length(ROIs));
-IVIMPars = {'f_slow','f_interm','f_fast','D_slow','D_interm','D_fast','S_0'};
-for par = 1 : length(IVIMPars)
-    ROIstat.(IVIMPars{par}).mean = zeros(1,length(ROIs));
-    ROIstat.(IVIMPars{par}).median = zeros(1,length(ROIs));
-    ROIstat.(IVIMPars{par}).std = zeros(1,length(ROIs));
-    ROIstat.(IVIMPars{par}).CV = zeros(1,length(ROIs));
-    ROIstat.(IVIMPars{par}).iqr = zeros(1,length(ROIs));
-    ROIstat.(IVIMPars{par}).q1 = zeros(1,length(ROIs));
-    ROIstat.(IVIMPars{par}).q3 = zeros(1,length(ROIs));
-end
-
-for rois = 1 : length(ROIs)
-    if rois == 1
-        [~,name,~] = fileparts(MaskNii);
-    else
-        [~,name,~] = fileparts(ROINii{rois-1});
-    end
-    ROIstat.ROIname{rois} = name;
-    for par = 1 : length(IVIMPars)
-        eval(['ROIstat.' IVIMPars{par} '.mean(rois) = nanmean(' IVIMPars{par} '(ROIs{rois}==1),''all'');']);
-        eval(['ROIstat.' IVIMPars{par} '.median(rois) = nanmedian(' IVIMPars{par} '(ROIs{rois}==1),''all'');']);
-        eval(['ROIstat.' IVIMPars{par} '.std(rois) = nanstd(' IVIMPars{par} '(ROIs{rois}==1),0,''all'');']);
-        eval(['ROIstat.' IVIMPars{par} '.CV(rois) = ROIstat.' IVIMPars{par} '.std(rois) /ROIstat.' IVIMPars{par} '.mean(rois);']);
-        eval(['ROIstat.' IVIMPars{par} '.iqr(rois) = iqr(reshape(' IVIMPars{par} '(ROIs{rois}==1),[],1));']);
-        eval(['ROIstat.' IVIMPars{par} '.q1(rois) = prctile(reshape(' IVIMPars{par} '(ROIs{rois}==1),[],1),25);']);
-        eval(['ROIstat.' IVIMPars{par} '.q3(rois) = prctile(reshape(' IVIMPars{par} '(ROIs{rois}==1),[],1),1);']);
-    end
-end
+ROIstat = eval_rois(ROIs,ROINii,MaskNii,f_slow,f_interm,f_fast,D_slow,D_interm,D_fast,S_0)
 
 
 filenm = sprintf('%s%sIDEALfit%s_steps_%s.mat',...
     P.outputFolder, filesep, file_name, num2str(size(P.Dims_steps, 1)));
 save(filenm);
+end
+function ROIstat = eval_rois(ROIs,ROINii,MaskNii,f_slow,f_interm,f_fast,D_slow,D_interm,D_fast,S_0)
+%% Perform ROI-based analysis
+ROIstat.ROIname = cell(1,length(ROIs));
+IVIMPars = {'f_slow','f_interm','f_fast','D_slow','D_interm','D_fast','S_0'};
+    for par = 1 : length(IVIMPars)
+        ROIstat.(IVIMPars{par}).mean = zeros(1,length(ROIs));
+        ROIstat.(IVIMPars{par}).median = zeros(1,length(ROIs));
+        ROIstat.(IVIMPars{par}).std = zeros(1,length(ROIs));
+        ROIstat.(IVIMPars{par}).CV = zeros(1,length(ROIs));
+        ROIstat.(IVIMPars{par}).iqr = zeros(1,length(ROIs));
+        ROIstat.(IVIMPars{par}).q1 = zeros(1,length(ROIs));
+        ROIstat.(IVIMPars{par}).q3 = zeros(1,length(ROIs));
+    end
+
+    version_num = split(version(),' ');
+    version_num = split(version_num{1},'.');
+    version_num = join(version_num(1:2),'.');
+    version_num = str2num(version_num{1});
+
+    if version_num > 9.4
+        for rois = 1 : length(ROIs)
+            if rois == 1
+                [~,name,~] = fileparts(MaskNii);
+            else
+                [~,name,~] = fileparts(ROINii{rois-1});
+            end
+            ROIstat.ROIname{rois} = name;
+            for par = 1 : length(IVIMPars)
+                eval(['ROIstat.' IVIMPars{par} '.mean(rois) = nanmean(' IVIMPars{par} '(ROIs{rois}==1),''all'');']);
+                eval(['ROIstat.' IVIMPars{par} '.median(rois) = nanmedian(' IVIMPars{par} '(ROIs{rois}==1),''all'');']);
+                eval(['ROIstat.' IVIMPars{par} '.std(rois) = nanstd(' IVIMPars{par} '(ROIs{rois}==1),0,''all'');']);
+                eval(['ROIstat.' IVIMPars{par} '.CV(rois) = ROIstat.' IVIMPars{par} '.std(rois) /ROIstat.' IVIMPars{par} '.mean(rois);']);
+                eval(['ROIstat.' IVIMPars{par} '.iqr(rois) = iqr(reshape(' IVIMPars{par} '(ROIs{rois}==1),[],1));']);
+                eval(['ROIstat.' IVIMPars{par} '.q1(rois) = prctile(reshape(' IVIMPars{par} '(ROIs{rois}==1),[],1),25);']);
+                eval(['ROIstat.' IVIMPars{par} '.q3(rois) = prctile(reshape(' IVIMPars{par} '(ROIs{rois}==1),[],1),1);']);
+            end
+        end
+    elseif version_num <= 9.4
+        for rois = 1 : length(ROIs)
+            if rois == 1
+                [~,name,~] = fileparts(MaskNii);
+            else
+                [~,name,~] = fileparts(ROINii{rois-1});
+            end            
+            ROIstat.ROIname{rois} = name;
+            for par = 1 : length(IVIMPars)
+                eval(['ROIstat.' IVIMPars{par} '.mean(rois) = nanmean(' IVIMPars{par} '(ROIs{rois}==1));']);
+                eval(['ROIstat.' IVIMPars{par} '.median(rois) = nanmedian(' IVIMPars{par} '(ROIs{rois}==1));']);
+                eval(['ROIstat.' IVIMPars{par} '.std(rois) = nanstd(' IVIMPars{par} '(ROIs{rois}==1),0);']);
+                eval(['ROIstat.' IVIMPars{par} '.CV(rois) = ROIstat.' IVIMPars{par} '.std(rois) /ROIstat.' IVIMPars{par} '.mean(rois);']);
+                eval(['ROIstat.' IVIMPars{par} '.iqr(rois) = iqr(reshape(' IVIMPars{par} '(ROIs{rois}==1),[],1));']);
+                eval(['ROIstat.' IVIMPars{par} '.q1(rois) = prctile(reshape(' IVIMPars{par} '(ROIs{rois}==1),[],1),25);']);
+                eval(['ROIstat.' IVIMPars{par} '.q3(rois) = prctile(reshape(' IVIMPars{par} '(ROIs{rois}==1),[],1),1);']);
+            end
+        end
+    end
+
 end
