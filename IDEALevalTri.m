@@ -17,6 +17,7 @@ AdjRsq = nan(size(Mask));
 RMSE = nan(size(Mask));
 Residuals = nan(size(Mask, 1), size(Mask, 2), 16);
 
+FitQuality = struct();
 
 for kx = 1:size(Mask, 1)
     for ky = 1:size(Mask, 2)

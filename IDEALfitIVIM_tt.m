@@ -42,6 +42,7 @@ ROIs = load_ROIS(MaskNii,ROINii,load_rois); % maybe move down to eval section
 
 %% Perform IDEAL fitting
 
+tStart = tic;
 % clearvars a b c d e f fitresults gof output
 for slice = 1:(size(Data_raw,3))
     
@@ -50,7 +51,20 @@ for slice = 1:(size(Data_raw,3))
     Data_masked = squeeze(Data_raw_masked(:,:,slice,:));
     Mask = squeeze(Mask_raw(:,:,slice,:));
     
-    tStart = tic;
+    
+    % prepare Output structs
+    FitQuality = cell(size(Data_raw,3),1,1);
+    ROIstat = cell(size(Data_raw,3),1,1);    
+    
+    % Check if sclice contains data after masking. If not skip slice
+    if isempty(Data_masked(~isnan(Data_masked)))
+        FitQuality{slice} = {};
+        ROIstat{slice} = {};
+        fprintf('Slice %s does not contain any data after masking and will be skipped.\n',...
+            num2str(slice));
+        continue
+    end
+    
     for res = 1 : size(P.Dims_steps, 1)
         % res : current resampling step    
         fprintf('Downsampling step no: %s of slice %s\n', num2str(res), num2str(slice));
@@ -159,7 +173,7 @@ for slice = 1:(size(Data_raw,3))
             D_slow_res = imresize(D_slow,...
                 [P.Dims_steps(res+1,2) P.Dims_steps(res+1,1)], 'bilinear');
 
-            if strcmp(P.Model,'Biexp') || strcmp(P.op.Model,'Triexp')  
+            if strcmp(P.Model,'Biexp') || strcmp(P.Model,'Triexp')  
                 f_fast_res = imresize(f_fast,...
                     [P.Dims_steps(res+1,2) P.Dims_steps(res+1,1)], 'bilinear');        
                 D_fast_res = imresize(D_fast,...
@@ -177,19 +191,13 @@ for slice = 1:(size(Data_raw,3))
     end
     P.time = toc(tStart);
     
-    % prepare struct
-    FitQuality = cell(size(Data_raw,3),1,1);
-    ROIstat = cell(size(Data_raw,3),1,1);
+    
     % prepare ROI
     ROI{1} = squeeze(ROIs{1}(:,:,slice));
     
-    if find(~cellfun(@isempty,FitResults))
-        FitQuality{slice} = {};
-        ROIstat{slice} = {};
-    else
-        [FitQuality{slice},ROIstat{slice}] = IDEALevalTri(Mask,FitResults,gof,output,...
-                            DataNii,P,ROI,ROINii,Data,MaskNii);
-    end
+    [FitQuality{slice},ROIstat{slice}] = IDEALevalTri(Mask,FitResults,gof,output,...
+                                    DataNii,P,ROI,ROINii,Data,MaskNii);
+
 end
 end
 
