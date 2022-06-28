@@ -194,10 +194,15 @@ for slice = 1:(size(Data_raw,3))
     
     % prepare ROI
     ROI{1} = squeeze(ROIs{1}(:,:,slice));
-    
-    [FitQuality{slice},ROIstat{slice}] = IDEALevalTri(Mask,FitResults,gof,output,...
-                                    DataNii,P,ROI,ROINii,Data,MaskNii);
-
+    switch p.Model
+        case 'ADC'
+        case 'Biexp'
+            [FitQuality{slice},ROIstat{slice}] = IDEALevalBiexp(...
+                FitResults,gof,output,DataNii,P,ROIs,ROINii,Data,MaskNii,slice);
+        case 'Triexp'
+            [FitQuality{slice},ROIstat{slice}] = IDEALevalTriexp(Mask,...
+                FitResults,gof,output,DataNii,P,ROI,ROINii,Data,MaskNii,slice);
+    end
 end
 end
 
@@ -206,8 +211,10 @@ end
 
 function [Lower,Upper,StartPoint] = set_fitting_boundries(Tol,Model,S_0,D1,varargin)
 %% [Lower,Upper,StartPoint] = set_fitting_boundries(Tol,Model,S_0,D1,varargin)
-% recalculate 
-%
+% recalculate fitting starting points and boundries from previous iteration
+% depending on Model choosen. 
+% Basic ADC parameters have to be provided
+% 
 % varargin : {f_slow, D_slow, f_inter, D_inter}
 %            {f_2,    D_2,    f3,      D3)
 
