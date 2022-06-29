@@ -24,7 +24,7 @@ function [fitresult, gof, output] = BiexpFit(b, data, op)
 [xData, yData] = prepareCurveData( b, data );
 
 % Set up fittype and options.
-ft = fittype( 'd*((1-a)*exp(-b*x) + a*exp(-c*x)', 'independent', 'x', 'dependent', 'y' );
+ft = fittype( 'd*((1-a)*exp(-b*x) + a*exp(-c*x))', 'independent', 'x', 'dependent', 'y' );
 opts = fitoptions( 'Method', 'NonlinearLeastSquares' );
 %opts.Algorithm = 'Levenberg-Marquardt';
 %opts.Algorithm = 'Trust-Region';

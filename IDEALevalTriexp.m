@@ -100,16 +100,16 @@ if P.plot
     if ~exist(P.outputFolder)
         mkdir(P.outputFolder);
     end
-    fignm_param = sprintf('%s%sIDEALfit_%s_slice_%s_steps_%s_param.fig',...
-        P.outputFolder, filesep, slice ,file_name, num2str(size(P.Dims_steps,1)));
+    fignm_param = sprintf('%s%sIDEALfit_%s_slice_%d_steps_%d_param.fig',...
+        P.outputFolder, filesep, slice ,file_name, size(P.Dims_steps,1));
     savefig(gcf, fignm_param);
     close(gcf);
 end
    
 ROIstat = eval_rois(ROIs,ROINii,MaskNii,f_slow,f_interm,f_fast,D_slow,D_interm,D_fast,S_0);
 
-filenm = sprintf('%s%sIDEALfit_%s_slice_%s_steps_%s.mat',...
-    P.outputFolder, filesep,slice, file_name, num2str(size(P.Dims_steps, 1)));
+filenm = sprintf('%s%sIDEALfit_%s_slice_%d_steps_%d.mat',...
+    P.outputFolder, filesep,slice, file_name, size(P.Dims_steps, 1));
 save(filenm);
 end
 function ROIstat = eval_rois(ROIs,ROINii,MaskNii,f_slow,f_interm,f_fast,D_slow,D_interm,D_fast,S_0)

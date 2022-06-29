@@ -194,7 +194,7 @@ for slice = 1:(size(Data_raw,3))
     
     % prepare ROI
     ROI{1} = squeeze(ROIs{1}(:,:,slice));
-    switch p.Model
+    switch P.Model
         case 'ADC'
         case 'Biexp'
             [FitQuality{slice},ROIstat{slice}] = IDEALevalBiexp(...

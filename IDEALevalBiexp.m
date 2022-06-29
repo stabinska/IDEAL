@@ -7,24 +7,24 @@ function [FitQuality,ROIstat] = IDEALevalBiexp(FitResults,gof,output,DataNii,P,R
 
 
 % initiate Parameters
-f_slow = nan(size(Data));
-f_fast = nan(size(Data));
-D_slow = nan(size(Data));
-D_fast = nan(size(Data));
-S_0 = nan(size(Data));
+f_slow = nan(size(Data(:,:)));
+f_fast = nan(size(Data(:,:)));
+D_slow = nan(size(Data(:,:)));
+D_fast = nan(size(Data(:,:)));
+S_0 = nan(size(Data(:,:)));
 
-SSE = nan(size(Data));
-Rsq = nan(size(Data));
-Dfe = nan(size(Data));
-AdjRsq = nan(size(Data));
-RMSE = nan(size(Data));
-Residuals = nan(size(Data, 1), size(Data, 2), 16);
+SSE = nan(size(Data(:,:)));
+Rsq = nan(size(Data(:,:)));
+Dfe = nan(size(Data(:,:)));
+AdjRsq = nan(size(Data(:,:)));
+RMSE = nan(size(Data(:,:)));
+Residuals = nan(size(Data(:,:), 1), size(Data(:,:), 2), 16);
 
 FitQuality = struct();
 
 % extract Parameters
-for x = 1:size(Mask, 1)
-    for y = 1:size(Mask, 2)
+for x = 1:size(Data, 1)
+    for y = 1:size(Data, 2)
         if ~isempty(FitResults{x,y})
             %  fitting Parameters 
             %  d = S_0
@@ -95,8 +95,8 @@ if P.plot
     if ~exist(P.outputFolder)
         mkdir(P.outputFolder);
     end
-    fignm_param = sprintf('%s%sIDEALfit_%s_slice_%s_steps_%s_param.fig',...
-        P.outputFolder, filesep, file_name, slice, num2str(size(P.Dims_steps,1)));
+    fignm_param = sprintf('%s%sIDEALfit_%s_slice_%d_steps_%d_param.fig',...
+        P.outputFolder, filesep, file_name, slice, size(P.Dims_steps,1));
     savefig(gcf, fignm_param);
     close(gcf);
 end
@@ -104,8 +104,8 @@ end
 
 ROIstat = eval_rois(ROIs,ROINii,MaskNii,f_slow,f_fast,D_slow,D_fast,S_0);
 
-filenm = sprintf('%s%sIDEALfit_%s_slice_%s_steps_%s.mat',...
-    P.outputFolder, filesep, slice, file_name, num2str(size(P.Dims_steps, 1)));
+filenm = sprintf('%s%sIDEALfit_%s_slice_%d_steps_%d.mat',...
+    P.outputFolder, filesep, file_name, slice, size(P.Dims_steps, 1));
 save(filenm);
 
 
