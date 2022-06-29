@@ -194,15 +194,17 @@ for slice = 1:(size(Data_raw,3))
     
     % prepare ROI
     ROI{1} = squeeze(ROIs{1}(:,:,slice));
-    switch P.Model
-        case 'ADC'
-        case 'Biexp'
-            [FitQuality{slice},ROIstat{slice}] = IDEALevalBiexp(...
-                FitResults,gof,output,DataNii,P,ROIs,ROINii,Data,MaskNii,slice);
-        case 'Triexp'
-            [FitQuality{slice},ROIstat{slice}] = IDEALevalTriexp(Mask,...
-                FitResults,gof,output,DataNii,P,ROI,ROINii,Data,MaskNii,slice);
-    end
+    [FitQuality{slice},ROIstat{slice}] = IDEALevalFitting(FitResults,gof,...
+                        output,P,Data,DataNii,ROI,ROINii,MaskNii,slice);
+%     switch P.Model
+%         case 'ADC'
+%         case 'Biexp'
+%             [FitQuality{slice},ROIstat{slice}] = IDEALevalBiexp(...
+%                 FitResults,gof,output,DataNii,P,ROI,ROINii,Data,MaskNii,slice);
+%         case 'Triexp'
+%             [FitQuality{slice},ROIstat{slice}] = IDEALevalTriexp(Mask,...
+%                 FitResults,gof,output,DataNii,P,ROI,ROINii,Data,MaskNii,slice);
+%     end
 end
 end
 
