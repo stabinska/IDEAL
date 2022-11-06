@@ -39,6 +39,11 @@ end
 [Data_raw, Mask_raw, Data_raw_masked] = load_files(DataNii,MaskNii);
 ROIs = load_ROIS(MaskNii,ROINii,load_rois); % maybe move down to eval section
 
+if size(Data_raw,4) == 1 && size(Data_raw,3) > 1
+    Data_raw = permute(Data_raw,[1,2,4,3]);
+    Data_raw_masked = permute(Data_raw_masked,[1,2,4,3]);
+end
+
 
 %% Perform IDEAL fitting
 
