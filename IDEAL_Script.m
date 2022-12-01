@@ -47,19 +47,19 @@ end
     P.b_values = [0,10,20,30,50,70,100,150,200,250,300,350,450,550,650,750];
     P.slice = 1;
 %   Output folder for the plots (will be created automatically)
-    P.outputFolder = 'E:\home\Thomas\Sciebo\Projekte\Kidney_IDEAL\test_data_julia\output_tt';
-%     P.outputFolder = '/mnt/SharedData/home/thomas/Sciebo/Projekte/Kidney_IDEAL/test_data_julia/output_tt';
+%     P.outputFolder = 'E:\home\Thomas\Sciebo\Projekte\Kidney_IDEAL\test_data_julia\output_tt';
+    P.outputFolder = '/mnt/SharedData/home/thomas/Sciebo/Projekte/Kidney_IDEAL/test_data_julia/output_tt';
     P.plot = 1; %Plot flag
 
 %% Call IDEAL fit
 % Include path to 3D DWI nifti file, parameter struct, nifit mask, and a
 % cell array of nifit ROIs for the statistics (optional)
 % 
-Data = 'E:\home\Thomas\Sciebo\Projekte\Kidney_IDEAL\test_data_julia\20200804_164104DTIPGSETE71Delta20delta62s006a1001.nii'; %Path to data
-MaskNii = 'E:\home\Thomas\Sciebo\Projekte\Kidney_IDEAL\test_data_julia\Delta_Niere06_sl1_niererechts.nii'; %Path to mask
-ROIsNiiCell = {'E:\home\Thomas\Sciebo\Projekte\Kidney_IDEAL\test_data_julia\Delta_Niere06_sl1_cortexrechts.nii'}; %Cell with paths to ROIs
+% Data = 'E:\home\Thomas\Sciebo\Projekte\Kidney_IDEAL\test_data_julia\20200804_164104DTIPGSETE71Delta20delta62s006a1001.nii'; %Path to data
+% MaskNii = 'E:\home\Thomas\Sciebo\Projekte\Kidney_IDEAL\test_data_julia\Delta_Niere06_sl1_niererechts.nii'; %Path to mask
+% ROIsNiiCell = {'E:\home\Thomas\Sciebo\Projekte\Kidney_IDEAL\test_data_julia\Delta_Niere06_sl1_cortexrechts.nii'}; %Cell with paths to ROIs
 
-% Data = '/mnt/SharedData/home/thomas/Sciebo/Projekte/Kidney_IDEAL/test_data_julia/20200804_164104DTIPGSETE71Delta20delta62s006a1001.nii'; %Path to data
-% MaskNii = '/mnt/SharedData/home/thomas/Sciebo/Projekte/Kidney_IDEAL/test_data_julia/Delta_Niere06_sl1_niererechts.nii'; %Path to mask
-% ROIsNiiCell = {'/mnt/SharedData/home/thomas/Sciebo/Projekte/Kidney_IDEAL/test_data_julia/Delta_Niere06_sl1_cortexrechts.nii'}; %Cell with paths to ROIs
+Data = '/mnt/SharedData/home/thomas/Sciebo/Projekte/Kidney_IDEAL/test_data_julia/20200804_164104DTIPGSETE71Delta20delta62s006a1001.nii'; %Path to data
+MaskNii = '/mnt/SharedData/home/thomas/Sciebo/Projekte/Kidney_IDEAL/test_data_julia/Delta_Niere06_sl1_niererechts.nii'; %Path to mask
+ROIsNiiCell = {'/mnt/SharedData/home/thomas/Sciebo/Projekte/Kidney_IDEAL/test_data_julia/Delta_Niere06_sl1_cortexrechts.nii'}; %Cell with paths to ROIs
 [FitResults,FitQuality,P,ROIstat] = IDEALfitIVIM_tt(Data,P,MaskNii,ROIsNiiCell);    
