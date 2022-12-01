@@ -3,6 +3,7 @@ function [fit, FitQuality] = extract_fit_quality(fit, gof, output, sz, Model)
 % sz is the final matrix size
 
     FitQuality = struct();
+    fit.f_slow = NaN*ones(sz);
     for x = 1:sz(1)
         for y = 1:sz(2) 
             if ~isempty(gof{x,y})
@@ -14,9 +15,9 @@ function [fit, FitQuality] = extract_fit_quality(fit, gof, output, sz, Model)
                 FitQuality.Residuals(x,y,:) = output{x,y}.residuals;
                 switch Model
                     case {"biexp","Biexp"}
-                        fit.f_slow = 1 - fit.f_fast(x,y);
+                        fit.f_slow(x,y) = 1 - fit.f_fast(x,y);
                     case {"triexp","Triexp"}
-                        fit.f_slow = 1 - fit.f_interm(x,y) - fit.f_fast(x,y);
+                        fit.f_slow(x,y) = 1 - fit.f_inter(x,y) - fit.f_fast(x,y);
                 end
             end
         end

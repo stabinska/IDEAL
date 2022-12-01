@@ -1,10 +1,10 @@
 function fig = plot_params_figs(Params, fit, path_Data)
 % plot and save figures for triexp model
     fig = figure('Visible','on');
-    switch Model
-        case "biexp"
+    switch Params.Model
+        case {"biexp","Biexp"}
             fit_params = ["f_slow";"f_fast";"D_slow","D_fast","S_0"];
-        case "triexp"
+        case {"triexp","Triexp"}
             fit_params = ["f_slow";"f_inter";"f_fast";
                             "D_slow";"D_inter";"D_fast";"S_0"];
             nx = 3; ny = 3;
@@ -23,8 +23,9 @@ function fig = plot_params_figs(Params, fit, path_Data)
     if ~exist(Params.outputFolder,"dir")
         mkdir(Params.outputFolder);
     end
-    fig_name = sprintf(Params.outputFolder+filesep+"_IDEALfit_"+ ...
-                    file_name+"_steps_%d_param.fig",size(P.Dims_steps, 1));
+    fig_name = Params.outputFolder+filesep+"IDEALfit_"+ ...
+                    file_name+ "_steps_"+ ...
+                    num2str(size(Params.Dims_steps,1))+"_param.fig";
     savefig(gcf, fig_name);
     close(gcf);
 end

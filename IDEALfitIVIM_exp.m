@@ -28,10 +28,10 @@ function [FitResults,FitQuality,Params,ROIstat] = IDEALfitIVIM_exp(path_Data,Par
     end
     
     if nargin < 4
-        [Data_raw, Mask_raw, Data_raw_masked,ROIs] = ...
+        [Data_raw, Mask_raw, Data_raw_masked,ROIs,Params] = ...
             load_data(path_Data,path_Mask,Params);
     elseif nargin == 4
-        [Data_raw, Mask_raw, Data_raw_masked,ROIs] = ...
+        [Data_raw, Mask_raw, Data_raw_masked,ROIs,Params] = ...
             load_data(path_Data,path_Mask,Params,path_ROI);
     end
     
@@ -107,7 +107,7 @@ function [FitResults,FitQuality,Params,ROIstat] = IDEALfitIVIM_exp(path_Data,Par
     Params.time = toc(tStart);
     
     % Extract Quality Parameters for final fit 
-    FitQuality = extract_fit_quality(fit, gof, output, size(Mask_res), Params.Model);
+    [fit, FitQuality] = extract_fit_quality(fit, gof, output, size(Mask_res), Params.Model);
     
     % Plot Figures and Save 
     [~] = plot_params_figs(Params, fit, path_Data);

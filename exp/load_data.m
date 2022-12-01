@@ -1,4 +1,4 @@
-function [Data,Mask,Data_masked,ROIs] = load_data(path_Data,path_Mask,Params,varargin)
+function [Data,Mask,Data_masked,ROIs,Params] = load_data(path_Data,path_Mask,Params,varargin)
 
 %% Function load_Data
 % 
@@ -62,4 +62,10 @@ else
     ROIs{1}(ROIs{1}==0) =NaN; 
     sprintf('No ROI supplied. We will do statistics on the VOI mask.')
 end
+
+% check weather outputFolder is a string
+if ~isstring(Params.outputFolder)
+    Params.outputFolder = string(Params.outputFolder);
+end
+
 end
