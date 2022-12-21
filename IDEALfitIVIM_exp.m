@@ -28,9 +28,11 @@ function [FitResults,FitQuality,Params,ROIstat] = IDEALfitIVIM_exp(path_Data,Par
     end
     
     if nargin < 4
+        % if no ROIs are deployed
         [Data_raw, Mask_raw, Data_raw_masked,ROIs,Params] = ...
             load_data(path_Data,path_Mask,Params);
     elseif nargin == 4
+        % else load ROIs to cell array
         [Data_raw, Mask_raw, Data_raw_masked,ROIs,Params] = ...
             load_data(path_Data,path_Mask,Params,path_ROI);
     end
@@ -86,9 +88,18 @@ function [FitResults,FitQuality,Params,ROIstat] = IDEALfitIVIM_exp(path_Data,Par
                         if ~isnan(Data_res(x,y,1))
                             % only run if voxel is part of mask and data 
                             % is present else skip
-                            [FitResults{x,y}, gof{x,y}, output{x,y}] = ...
-                                TriexpFit(Params.b_values, ...
-                                squeeze(Data_res(x,y,:))', op);
+                            switch Params.Model
+                                case {"biexp","Biexp"}
+                                    [FitResults{x,y}, gof{x,y}, ...
+                                        output{x,y}] = ...
+                                        BiexpFit(Params.b_values, ...
+                                        squeeze(Data_res(x,y,:))', op);
+                                case {"triexp","Triexp"}
+                                    [FitResults{x,y}, gof{x,y}, ...
+                                        output{x,y}] = ...
+                                        TriexpFit(Params.b_values, ...
+                                        squeeze(Data_res(x,y,:))', op);
+                            end                            
                             fit = extract_fit(fit,FitResults, ...
                                             Params.Model,x,y);
                        
@@ -111,4 +122,11 @@ function [FitResults,FitQuality,Params,ROIstat] = IDEALfitIVIM_exp(path_Data,Par
     
     % Plot Figures and Save 
     [~] = plot_params_figs(Params, fit, path_Data);
+
+    % Save fit struct
+    [~,file_name,~] = fileparts(path_Data);
+    fname = Params.outputFolder + filesep + "IDEALfit_" + ...
+            file_name + "_" + string(Params.Model) + "_steps_" + ...
+            num2str(size(Params.Dims_steps,1)) + "_fit.mat";
+    save(fname,"fit")
 end

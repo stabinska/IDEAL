@@ -19,9 +19,9 @@ function op_out = update_fitting(op, fit_res, Params, x, y)
             op_out.Upper(2) = fit_res.D_slow(x,y)*(1+Params.Tol(2));
     
             % D_fast
-            op_out.Lower(3) = fit_res.D_fast*(1-Params.Tol(2));
-            op_out.StartPoint(3) = fit_res.D_fast;
-            op_out.Upper(3) = fit_res.D_fast*(1+Params.Tol(2));
+            op_out.Lower(3) = fit_res.D_fast(x,y)*(1-Params.Tol(2));
+            op_out.StartPoint(3) = fit_res.D_fast(x,y);
+            op_out.Upper(3) = fit_res.D_fast(x,y)*(1+Params.Tol(2));
     
             % S_0
             op_out.Lower(4) = fit_res.S_0(x,y)*(1-Params.Tol(3));

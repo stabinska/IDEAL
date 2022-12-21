@@ -3,7 +3,7 @@ function fit_res = interpolate_fit(fit,Dims_steps,res_step,Model)
 
     switch Model
         case {"biexp","Biexp"}
-            params = ["f_fast";"D_slow","D_fast","S_0"];
+            params = ["f_fast";"D_slow";"D_fast";"S_0"];
         case {"triexp","Triexp"}
             params = ["f_inter";"f_fast";"D_slow";"D_inter";"D_fast";"S_0"];
     end

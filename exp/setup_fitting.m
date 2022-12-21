@@ -12,14 +12,15 @@ function [fit, FitResults, gof, output, op] = setup_fitting(Params,res_step,sz)
                     Params.Dims_steps(res_step,2));
     
     % Parameters for Bi and Tri
-    if strcmp(Params.Model,'biexp') || strcmp(Params.Model,'triexp')          
+    if strcmp(Params.Model,"biexp") || strcmp(Params.Model,"triexp") || ...
+            strcmp(Params.Model,"Biexp") || strcmp(Params.Model,"Triexp")
         fit.f_fast = zeros(Params.Dims_steps(res_step,1), ...
                     Params.Dims_steps(res_step,2)); % f_fast
         fit.D_fast = zeros(Params.Dims_steps(res_step,1), ...
                     Params.Dims_steps(res_step,2)); % D_fast
     end
     % Parameters for Tri
-    if strcmp(Params.Model,'triexp')
+    if strcmp(Params.Model,'triexp') || strcmp(Params.Model,"Triexp")
         fit.f_inter = zeros(Params.Dims_steps(res_step,1), ...
                             Params.Dims_steps(res_step,2)); % f_inter
         fit.D_inter = zeros(Params.Dims_steps(res_step,1), ...

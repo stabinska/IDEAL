@@ -17,13 +17,12 @@
 %   limit for step n + 1.
 
 switch P.Model
-    case 'Biexp'        
+    case {"biexp","Biexp"}        
 %                       f_fast D_slow D_fast S_0
         P.op.Lower =    [0.01  0.0011 0.003  10];  
         P.op.StartPoint = [0.1  0.0015  0.005  210];
         P.op.Upper =      [0.7 0.003  0.01  1000]; 
-    case 'Triexp'
-        
+    case {"triexp","Triexp"}        
 %                   finterm ffast Dslow Dinterm Dfast S0  Triexp
         P.op.Lower =    [0.1  0.01  0.0011 0.003   0.01  10];  
         P.op.StartPoint = [0.2  0.1  0.0015  0.005  0.1  210];
@@ -47,7 +46,7 @@ end
     P.b_values = [0,10,20,30,50,70,100,150,200,250,300,350,450,550,650,750];
     P.slice = 1;
 %   Output folder for the plots (will be created automatically)
-    P.outputFolder = 'E:\home\Thomas\Sciebo\Projekte\Kidney_IDEAL\test_data_julia\output_tt';
+    P.outputFolder = 'E:\home\Thomas\Sciebo\Projekte\Kidney_IDEAL\test_data_julia\output_exp';
 %     P.outputFolder = '/mnt/SharedData/home/thomas/Sciebo/Projekte/Kidney_IDEAL/test_data_julia/output_tt';
     P.plot = 1; %Plot flag
 
@@ -62,4 +61,4 @@ ROIsNiiCell = {'E:\home\Thomas\Sciebo\Projekte\Kidney_IDEAL\test_data_julia\Delt
 % Data = '/mnt/SharedData/home/thomas/Sciebo/Projekte/Kidney_IDEAL/test_data_julia/20200804_164104DTIPGSETE71Delta20delta62s006a1001.nii'; %Path to data
 % MaskNii = '/mnt/SharedData/home/thomas/Sciebo/Projekte/Kidney_IDEAL/test_data_julia/Delta_Niere06_sl1_niererechts.nii'; %Path to mask
 % ROIsNiiCell = {'/mnt/SharedData/home/thomas/Sciebo/Projekte/Kidney_IDEAL/test_data_julia/Delta_Niere06_sl1_cortexrechts.nii'}; %Cell with paths to ROIs
-[FitResults,FitQuality,P,ROIstat] = IDEALfitIVIM_tt(Data,P,MaskNii,ROIsNiiCell);    
+[FitResults,FitQuality,P,ROIstat] = IDEALfitIVIM_exp(Data,P,MaskNii,ROIsNiiCell);    
