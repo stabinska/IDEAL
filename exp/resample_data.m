@@ -1,5 +1,11 @@
 function [Mask_res, Data_res] = resample_data(Mask,Data,steps,b_values)
+%resample_data(Mask 'double', Data 'double', steps 'double', b_values 'double')
 % resample Matrix and Data for downsampling
+%
+%   Mask    : array containing masking 
+%   Data    : diffusion data
+%   steps   : current resampling step matrix
+%   b_values: array containing coresponding b_values
 
     % Downsampling Image Matrix to desired size
     Mask_res = imresize(Mask, [steps(2), steps(1)],'bilinear');

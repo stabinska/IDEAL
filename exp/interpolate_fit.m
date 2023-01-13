@@ -1,5 +1,11 @@
 function fit_res = interpolate_fit(fit,Dims_steps,res_step,Model)
-    % interpolate parametermaps to new size
+%interpolate_fit(fit 'struct', Dims_steps 'double', res_step 'double', Model 'string')
+% interpolate parametermaps to new size
+%
+%   fit         : struct containing fitting results
+%   Dims_steps  : array containing Downsampling steps
+%   res_step    : idx for current step
+%   Model       : "Biexp" or "Triexp"
 
     switch Model
         case {"biexp","Biexp"}

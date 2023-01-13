@@ -1,14 +1,12 @@
 function [Data,Mask,Data_masked,ROIs,Params] = load_data(path_Data,path_Mask,Params,varargin)
-
-%% Function load_Data
-% 
+%load_Data(path_Data 'string', path_Mask 'string', Params 'struct', varargin)
 % load different niftis for further processing
 % if the ROI path cell is not supplied the function will fill it with the
 % mask
 %
-% path_Data         - string or char pointing to the DWI image
-% path_Mask         - string or char pointing to the Mask image
-% varargin{1}       - cell array containing strings or chars to ROIs
+%   path_Data   : string or char pointing to the DWI image
+%   path_Mask   : string or char pointing to the Mask image
+%   varargin{1} : cell array containing strings or chars to ROIs
 
 
 % Load Data

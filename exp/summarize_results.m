@@ -1,6 +1,14 @@
-function [fit, FitQuality] = extract_fit_quality(fit, gof, output, sz, Model)
-% extract quality paramters for final fit
-% sz is the final matrix size
+function [fit, FitQuality] = summarize_results(fit, gof, output, sz, Model)
+%summarize_results(fit 'struct', gof 'struct', output 'struct', sz 'double')
+%'double', Model 'string')
+% extract quality paramters for final fit and summarize them in FitQuality
+% also calculates missing fraction from fitted ones
+%
+%   fit     : struct containing fitting results
+%   gof     : fitting results
+%   output  : fitting output struct
+%   sz      : is the final matrix size
+%   Model   : "Biexp" or "Triexp"
 
     FitQuality = struct();
     fit.f_slow = NaN*ones(sz);

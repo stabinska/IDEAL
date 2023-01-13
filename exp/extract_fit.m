@@ -1,4 +1,12 @@
 function fit = extract_fit(fit,FitResults,Model,x,y)
+%extract_fit(fit 'struct', FitResults 'struct', Model 'string', x 'double', y 'double')
+%transform fit results to "human readable" variables 
+%
+%   fit         : struct containing fitting results
+%   FitResults  : fitting results
+%   Model       : "Biexp" or "Triexp"
+%   x,y         : current x and y coordinate
+
     switch Model
         case {"biexp", "Biexp"}
             fit.f_fast(x,y)  = FitResults{x,y}.a;

@@ -1,5 +1,11 @@
 function op_out = update_fitting(op, fit_res, Params, x, y)
-% Update fitting parameters according to downsampling 
+%update_fitting(op, fit_res, Params, x, y)
+% Update fitting parameters according to downsampling
+%
+%   op      : fitting options
+%   fit_res : resampled fitting parameters
+%   Params  : Parameter struct
+%   x,y     : current x and y coordinate
 
     op_out = op;
     switch Params.Model

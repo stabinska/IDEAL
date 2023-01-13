@@ -1,5 +1,5 @@
 function [FitResults,FitQuality,Params,ROIstat] = IDEALfitIVIM_exp(path_Data,Params,path_Mask,path_ROI)
-%%  Function IDEALfit
+%IDEALfitIVIM_exp(path_Data 'string', Params 'struct', path_Mask 'string', path_ROI 'cell')
 % 
 %   Fit a bi-exponential or tri-exponential model to DWI data using the
 %   Iterative Downsampling Adaptive Least-squares (IDEAL) approach
@@ -40,7 +40,8 @@ function [FitResults,FitQuality,Params,ROIstat] = IDEALfitIVIM_exp(path_Data,Par
     
     %% Perform IDEAL fitting
     tStart = tic;
-    for slice = 1:size(Data_raw,3)
+%     for slice = 1:size(Data_raw,3)
+    for slice = Params.slice
     
         % Select single slice for image resizing
         Data = squeeze(Data_raw(:,:,slice,:));
@@ -113,20 +114,33 @@ function [FitResults,FitQuality,Params,ROIstat] = IDEALfitIVIM_exp(path_Data,Par
                                             res_step,Params.Model);
             end
         end
+        fprintf("Fitting Completed!\nStarting Plotting...\n");
+        Params.time = toc(tStart);
+        
+        % Extract Quality Parameters for final fit 
+        [fit, FitQuality] = summarize_results(fit, gof, output, size(Mask_res), Params.Model);
+        
+        % Plot Figures and Save 
+        [~] = plot_params_figs(Params, fit, path_Data);
+        fprintf("Plotting Completted!\n");
+    
+        % Save fit struct
+        [~,file_name,~] = fileparts(path_Data);
+        fname = Params.outputFolder + filesep + "IDEALfit_" + ...
+                file_name + "_" + string(Params.Model) + "_steps_" + ...
+                "_sl_" + slice + ...
+                num2str(size(Params.Dims_steps,1)) + "_fit.mat";
+        save(fname,"fit");
+    
+        % evaluate ROIs
+        if nargin == 4
+            ROIstat = eval_ROIS(ROIs,fit,Params.Model);    
+            fname = Params.outputFolder + filesep + "IDEALfit_" + ...
+                    file_name + "_" + string(Params.Model) + "_steps_" + ...
+                    "_sl_" + slice + ...
+                    num2str(size(Params.Dims_steps,1)) + "_ROIstat.mat";
+            save(fname,"ROIstat");
+            fprintf("ROIS evaluated!\n");
+        end
     end
-    fprintf("Fitting Completed!\nStarting Plotting...\n");
-    Params.time = toc(tStart);
-    
-    % Extract Quality Parameters for final fit 
-    [fit, FitQuality] = extract_fit_quality(fit, gof, output, size(Mask_res), Params.Model);
-    
-    % Plot Figures and Save 
-    [~] = plot_params_figs(Params, fit, path_Data);
-
-    % Save fit struct
-    [~,file_name,~] = fileparts(path_Data);
-    fname = Params.outputFolder + filesep + "IDEALfit_" + ...
-            file_name + "_" + string(Params.Model) + "_steps_" + ...
-            num2str(size(Params.Dims_steps,1)) + "_fit.mat";
-    save(fname,"fit")
 end

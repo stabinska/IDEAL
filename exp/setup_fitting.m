@@ -1,7 +1,10 @@
 function [fit, FitResults, gof, output, op] = setup_fitting(Params,res_step,sz)
-%% function setup_fitting(Params)
+%setup_fitting(Params 'struct', res_step 'double', sz 'double')
 % setup variables for fitted parameters
-% sz is the image/mask size
+%
+%   Params  : Parameter struct
+%   res_step: idx for current step
+%   sz      : is the final matrix size
 
     fit = struct();
     

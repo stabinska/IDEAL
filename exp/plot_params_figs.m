@@ -1,5 +1,10 @@
 function fig = plot_params_figs(Params, fit, path_Data)
+%plot_params_figs(Params 'struct', fit 'struct', path_Data 'string')
 % plot and save figures for triexp model
+%
+%   Params      : Parameter struct
+%   fit         : struct containing fitting results
+%   path_Data   : path to input data file
 
 
     switch Params.Model
