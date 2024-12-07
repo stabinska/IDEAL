@@ -8,7 +8,7 @@ function [fit, FitQuality] = summarize_results(fit, gof, output, sz, Model)
 %   gof     : fitting results
 %   output  : fitting output struct
 %   sz      : is the final matrix size
-%   Model   : "Biexp" or "Triexp"
+%   Model   : "Biexp", "Biexp_T1corr",  "Biexp_T1corrFixed", or "Triexp"
 
     FitQuality = struct();
     fit.f_slow = NaN*ones(sz);
@@ -23,6 +23,10 @@ function [fit, FitQuality] = summarize_results(fit, gof, output, sz, Model)
                 FitQuality.Residuals(x,y,:) = output{x,y}.residuals;
                 switch Model
                     case {"biexp","Biexp"}
+                        fit.f_slow(x,y) = 1 - fit.f_fast(x,y);
+                    case {"biexp_seg","Biexp_Seg"}
+                        fit.f_slow(x,y) = 1 - fit.f_fast(x,y);
+                    case {"biexp_T1corr","Biexp_T1corr"}
                         fit.f_slow(x,y) = 1 - fit.f_fast(x,y);
                     case {"triexp","Triexp"}
                         fit.f_slow(x,y) = 1 - fit.f_inter(x,y) - fit.f_fast(x,y);

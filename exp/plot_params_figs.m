@@ -9,17 +9,24 @@ function fig = plot_params_figs(Params, fit, path_Data)
 
     switch Params.Model
         % check model
+        case {"S0fit"}
+            fit_params = ["S_0"; "T1"; "T2"];
+            titles = ["S_{0}"; "T_{1}"];
+            nx = 3; ny = 2;
         case {"biexp","Biexp"}
             fit_params = ["f_slow";"f_fast";"D_slow";"D_fast";"S_0"];
             titles = ["f_{slow}";"f_{fast}";"D_{slow}";"D_{fast}";"S_{0}"];
             nx = 3; ny = 2;
+        case {"biexp_T1corr","Biexp_T1corr"}
+            fit_params = ["f_slow";"f_fast";"D_slow";"D_fast";"S_0";"T1"];
+            titles = ["f_{slow}";"f_{fast}";"D_{slow}";"D_{fast}";"S_{0}";"T_{1}"];
+            nx = 3; ny = 2;
         case {"triexp","Triexp"}
-            fit_params = ["f_slow";"f_inter";"f_fast";
-                            "D_slow";"D_inter";"D_fast";"S_0"];
-            titles = ["f_{slow}";"f_{inter}";"f_{fast}";
-                            "D_{slow}";"D_{inter}";"D_{fast}";"S_{0}"]; 
+            fit_params = ["f_slow";"f_inter";"f_fast"; "D_slow";"D_inter";"D_fast";"S_0"];
+            titles = ["f_{slow}";"f_{inter}";"f_{fast}"; "D_{slow}";"D_{inter}";"D_{fast}";"S_{0}"]; 
             nx = 3; ny = 3;
     end
+    
     % detect number of slices
     nslices = size(fit.S_0,3);
     for nslice = 1:nslices
@@ -37,11 +44,13 @@ function fig = plot_params_figs(Params, fit, path_Data)
                 caxis(gca,[0,1]);
             end
         end
+        
         % check if output-folder exists
         [~,file_name,~] = fileparts(path_Data);
         if ~exist(Params.outputFolder,"dir")
             mkdir(Params.outputFolder);
         end
+        
         % save figures
         fig_name = Params.outputFolder + filesep + "IDEALfit_" + ...
                         file_name + "_" + string(Params.Model) + "_steps_" + ...

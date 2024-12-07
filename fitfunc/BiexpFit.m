@@ -40,15 +40,6 @@ if strcmp(opts.Algorithm, 'Trust-Region')
     opts.Upper =      op.Upper;
 end
 
-% opts.Lower = [0.001 0.001 0.00001 0.002 0.009];
-% opts.MaxIter = 500;
-% opts.StartPoint = [0.16 0.06 0.0019 0.0097 0.551];
-% opts.Upper = [0.999 0.999 0.007 0.05 1];
-
-% opts.Lower = [ 0.001 0.001 0.0007 0.0025 0.015];
-% opts.MaxIter = 500;
-% opts.StartPoint = [ 0.4 0.03 0.0009 0.0058 0.16];
-% opts.Upper = [ 0.999 0.999 0.0025 0.015 0.2];
 
 % Fit model to data.
 [fitresult, gof, output] = fit( xData, yData, ft, opts );

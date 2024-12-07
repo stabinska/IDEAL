@@ -4,15 +4,19 @@ function ROIstat = eval_ROIS(ROIs,fit,Model)
 %
 %   ROIs    : cell array containing ROIs as matrix
 %   fit     : struct containing fitting results
-%   Model   : "Biexp" or "Triexp"
+%   Model   : "S0fit", "Biexp", "Biexp_T1corr", or "Triexp"
 
 
     switch Model
+        case {"S0fit"}
+            params = ["S_0"; "T1"; "T2"];
         case {"biexp","Biexp"}
             params = ["f_fast";"D_slow";"D_fast";"S_0"];
+        case {"biexp_T1corr","Biexp_T1corr"}
+            params = ["f_fast";"D_slow";"D_fast";"S_0";"T1"];
         case {"triexp","Triexp"}
             params = ["f_inter";"f_fast";"D_slow";...
-                "D_inter";"D_fast";"S_0"];
+                      "D_inter";"D_fast";"S_0"];
     end
        
     for idx_roi = 1:length(ROIs)

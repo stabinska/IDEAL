@@ -1,4 +1,4 @@
-function [Data,Mask,Data_masked,ROIs,Params] = load_data(path_Data,path_Mask,Params,varargin)
+function [Data,Mask,Data_masked,ROIs,T1map, Params] = load_data(path_Data,path_Mask,Params,varargin)
 %load_Data(path_Data 'string', path_Mask 'string', Params 'struct', varargin)
 % load different niftis for further processing
 % if the ROI path cell is not supplied the function will fill it with the
@@ -7,6 +7,7 @@ function [Data,Mask,Data_masked,ROIs,Params] = load_data(path_Data,path_Mask,Par
 %   path_Data   : string or char pointing to the DWI image
 %   path_Mask   : string or char pointing to the Mask image
 %   varargin{1} : cell array containing strings or chars to ROIs
+%   varargin{2} : cell aray  containing T1 maps
 
 
 % Load Data
@@ -15,7 +16,7 @@ if isstring(path_Data) || ischar(path_Data)
         path_Data = string(path_Data);
     end
     data_nii = double(rot90(niftiread(path_Data)));
-    Data = squeeze(data_nii(:,:,:,:));
+    Data = squeeze(data_nii(:,:,:,Params.b_threshold:end));
 else
     error("Path_Data has to be a string or a char!")
 end
@@ -47,7 +48,7 @@ else
 end
 
 % Load ROI
-if nargin > 2 
+if nargin > 3 
     path_ROIs = varargin{1};
     ROIs = cell(length(path_ROIs),1);
     for nROI = 1:length(path_ROIs)
@@ -60,6 +61,16 @@ else
     ROIs{1}(ROIs{1}==0) =NaN; 
     sprintf('No ROI supplied. We will do statistics on the VOI mask.')
 end
+
+% Load T1 map (if available)
+if nargin > 4
+    path_T1map = varargin{2};
+    T1map = double(rot90(niftiread(path_T1map),2));
+else
+    T1map = NaN;
+    sprintf('No T1 map supplied')
+end
+
 
 % check weather outputFolder is a string
 if ~isstring(Params.outputFolder)
