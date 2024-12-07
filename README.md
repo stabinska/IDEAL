@@ -23,7 +23,6 @@ Download the latest version from this [GitHub repository](https://github.com/sta
 ## Planned features
 
 - Automatic multi-slice analysis
-- Integration of biexponential IVIM fitting
 - Integration of open-source NLLS algorithms 
 
 ## Developers
