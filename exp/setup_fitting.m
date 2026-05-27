@@ -51,4 +51,19 @@ function [fit, FitResults, gof, output, op] = setup_fitting(Params,res_step,sz)
     output = FitResults;
     
     op = Params.op;
+
+    % Pre-build fittype once so the per-voxel loop never reconstructs it.
+    switch Params.Model
+        case {"biexp","Biexp"}
+            op.ft = fittype( 'd*((1-a)*exp(-b*x) + a*exp(-c*x))', ...
+                             'independent', 'x', 'dependent', 'y' );
+        case {"biexp_T1corr","Biexp_T1corr"}
+            expr = ['(exp(-' num2str(Params.TM) '/e)*d*((1-a)*exp(-b*x) + a*exp(-c*x))' ...
+                    '*(1-exp(-((' num2str(Params.TR) ' - ' num2str(Params.TM) ...
+                    ' - ' num2str(Params.TE) '/2)/e))))'];
+            op.ft = fittype( expr, 'independent', 'x', 'dependent', 'y' );
+        case {"triexp","Triexp"}
+            op.ft = fittype( 'f*((1-a-b)*exp(-c*x) + a*exp(-d*x) + b*exp(-e*x))', ...
+                             'independent', 'x', 'dependent', 'y' );
+    end
 end

@@ -18,7 +18,12 @@ function [fitresult, gof, output] = TriexpFit(b, data, op)
 [xData, yData] = prepareCurveData( b, data );
 
 % Set up fittype and options.
-ft = fittype( 'f*((1-a-b)*exp(-c*x)  + a*exp(-d*x)  + b*exp(-e*x))', 'independent', 'x', 'dependent', 'y' );
+% Re-use a pre-built fittype from op.ft when available (avoids per-voxel overhead).
+if isfield(op, 'ft')
+    ft = op.ft;
+else
+    ft = fittype( 'f*((1-a-b)*exp(-c*x)  + a*exp(-d*x)  + b*exp(-e*x))', 'independent', 'x', 'dependent', 'y' );
+end
 opts = fitoptions( 'Method', 'NonlinearLeastSquares' );
 %opts.Algorithm = 'Levenberg-Marquardt';
 %opts.Algorithm = 'Trust-Region';

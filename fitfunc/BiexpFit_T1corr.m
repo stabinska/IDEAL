@@ -22,11 +22,14 @@ function [fitresult, gof, output] = BiexpFit_T1corr(b, data, op, TM, TR, TE)
 
 %% Fit: 'untitled fit 1'.
 [xData, yData] = prepareCurveData( b, data );
-%expr = ['(exp(-' num2str(TM) '/e)*d*((1-a)*exp(-b*x) + a*exp(-c*x)))'];
-
-expr = ['(exp(-' num2str(TM) '/e)*d*((1-a)*exp(-b*x) + a*exp(-c*x))*(1-exp(-((' num2str(TR) ' - ' num2str(TM) ' - ' num2str(TE) '/2)/e))))'];
 % Set up fittype and options.
-ft = fittype( expr, 'independent', 'x', 'dependent', 'y' );
+% Re-use a pre-built fittype from op.ft when available (avoids per-voxel overhead).
+if isfield(op, 'ft')
+    ft = op.ft;
+else
+    expr = ['(exp(-' num2str(TM) '/e)*d*((1-a)*exp(-b*x) + a*exp(-c*x))*(1-exp(-((' num2str(TR) ' - ' num2str(TM) ' - ' num2str(TE) '/2)/e))))'];
+    ft = fittype( expr, 'independent', 'x', 'dependent', 'y' );
+end
 opts = fitoptions( 'Method', 'NonlinearLeastSquares' );
 %opts.Algorithm = 'Levenberg-Marquardt';
 %opts.Algorithm = 'Trust-Region';
